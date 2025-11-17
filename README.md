@@ -11,7 +11,7 @@
 
 ---
 
-## 📌 Project Description (500+ Words)
+## 📌 Project Description
 
 The **Expense Tracker App** is an Android-based mobile application developed as part of my internship at **CODTECH IT SOLUTIONS PVT. LTD** under the guidance of my mentor **Neela Santhosh**.  
 The primary goal of this project is to help users efficiently manage and monitor their daily financial activities by tracking expenses, categorizing them, and visualizing spending patterns using charts.
@@ -41,6 +41,7 @@ Overall, the Expense Tracker App is a practical and useful tool that demonstrate
 ---
 
 ## 📸 Output Screenshots
+
 
 
 
