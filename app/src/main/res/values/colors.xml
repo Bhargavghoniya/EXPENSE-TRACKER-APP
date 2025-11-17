@@ -2,4 +2,34 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="orange">#F48C73</color>
+    <color name="dark_purple">#2D0A3B</color>
+    <color name="light_gray">#F2F2F2</color>
+    <color name="dark_gray">#121212</color>
+
+
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+<!--    <color name="teal_700">#FF018786</color>-->
+    <color name="teal_700">#8692f7</color>
+    <color name="levender">#5761AE</color>
+    <color name="background">#f6f5f5</color>
+    <color name="category_background">#DEDADA</color>
+
+    <array name = "pieColors">
+        <item>#900C3F</item>
+        <item>#C70039</item>
+        <item>#FF5733</item>
+        <item>#C7BE00</item>
+        <item>#00C766</item>
+        <item>#00BCC7</item>
+        <item>#0085C7</item>
+        <item>#A500C7</item>
+        <item>#C7008D</item>
+        <item>#C70072</item>
+        <item>#C70050</item>
+        <item>#DAF7A6</item>
+    </array>
 </resources>

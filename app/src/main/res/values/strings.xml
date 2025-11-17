@@ -1,3 +1,18 @@
 <resources>
-    <string name="app_name">EXPENSE TRACKER</string>
+    <string name="app_name">Expense Tracker</string>
+    <string name="imgViewCat">Category img</string>
+    <string name="imgViewCalendar">Calendar image</string>
+    <string name="btnSelectDate">To select date</string>
+    <string name="txtViewDate">MM DD, YYYY</string>
+    <string name="editTxtDecimal">Enter amount</string>
+    <string name="imgViewPaymentMethod">Payment method image</string>
+    <string name="txtCanadianCurrency">CAD</string>
+    <string name="txtViewPaymentMethod">Payment method</string>
+    <string name="editTxtNotes">Enter notes (Optional)</string>
+    <string name="btnChooseCategory">Choose Category</string>
+    <string name="txtViewExpensePageTitle">ADD EXPENSE</string>
+    <string name="txtViewIncomePageTitle">ADD INCOME</string>
+    <string name="search_hint">input category to find</string>
+    <string name="txtWelcomepage">Loading...</string>
+    <string name="txtBalanceSheetTitle">BALANCE SHEET</string>
 </resources>
