@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    android:gravity="center_horizontal"
+    android:background="@color/white">
+
+    <!-- 🔐 LOCK ICON -->
+    <ImageView
+        android:id="@+id/imgLock"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/ic_lock"
+        android:layout_marginTop="40dp" />
+
+    <!-- TITLE -->
+    <TextView
+        android:id="@+id/txtTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter App PIN"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="22sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="25dp" />
+
+    <!-- PIN DOTS -->
+    <LinearLayout
+        android:id="@+id/layoutDots"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/pin1"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/pin_empty"
+            android:layout_margin="8dp" />
+
+        <ImageView
+            android:id="@+id/pin2"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/pin_empty"
+            android:layout_margin="8dp" />
+
+        <ImageView
+            android:id="@+id/pin3"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/pin_empty"
+            android:layout_margin="8dp" />
+
+        <ImageView
+            android:id="@+id/pin4"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/pin_empty"
+            android:layout_margin="8dp" />
+
+    </LinearLayout>
+
+    <!-- ERROR TEXT -->
+    <TextView
+        android:id="@+id/txtError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="16sp"
+        android:layout_marginTop="10dp" />
+
+    <!-- KEYPAD -->
+    <LinearLayout
+        android:id="@+id/layoutKeypad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_marginTop="35dp">
+
+        <!-- ROW 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn1"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="1"
+                android:tag="1"
+                android:textSize="22sp"
+                android:background="@drawable/key_bg" />
+
+            <Button
+                android:id="@+id/btn2"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="2"
+                android:tag="2"
+                android:textSize="22sp"
+                android:background="@drawable/key_bg"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp" />
+
+            <Button
+                android:id="@+id/btn3"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="3"
+                android:tag="3"
+                android:textSize="22sp"
+                android:background="@drawable/key_bg" />
+        </LinearLayout>
+
+        <!-- ROW 2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_marginTop="18dp">
+
+            <Button
+                android:id="@+id/btn4"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="4"
+                android:tag="4"
+                android:textSize="22sp"
+                android:background="@drawable/key_bg" />
+
+            <Button
+                android:id="@+id/btn5"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="5"
+                android:tag="5"
+                android:textSize="22sp"
+                android:background="@drawable/key_bg"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp" />
+
+            <Button
+                android:id="@+id/btn6"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="6"
+                android:tag="6"
+                android:textSize="22sp"
+                android:background="@drawable/key_bg" />
+        </LinearLayout>
+
+        <!-- ROW 3 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_marginTop="18dp">
+
+            <Button
+                android:id="@+id/btn7"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="7"
+                android:tag="7"
+                android:textSize="22sp"
+                android:background="@drawable/key_bg" />
+
+            <Button
+                android:id="@+id/btn8"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="8"
+                android:tag="8"
+                android:textSize="22sp"
+                android:background="@drawable/key_bg"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp" />
+
+            <Button
+                android:id="@+id/btn9"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="9"
+                android:tag="9"
+                android:textSize="22sp"
+                android:background="@drawable/key_bg" />
+        </LinearLayout>
+
+        <!-- ROW 4 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_marginTop="18dp">
+
+            <Button
+                android:id="@+id/btnDel"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="⌫"
+                android:tag="del"
+                android:textSize="22sp"
+                android:background="@drawable/key_bg" />
+
+            <Button
+                android:id="@+id/btn0"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="0"
+                android:tag="0"
+                android:textSize="22sp"
+                android:background="@drawable/key_bg"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp" />
+
+            <Button
+                android:id="@+id/btnOK"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="✔"
+                android:tag="ok"
+                android:textSize="22sp"
+                android:background="@drawable/key_bg" />
+        </LinearLayout>
+
+    </LinearLayout>
+    <ImageView
+        android:id="@+id/txtFingerprint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Unlock with Fingerprint"
+        android:textColor="@color/purple_700"
+        android:textSize="18sp"
+        android:src="@drawable/list"
+        android:layout_marginTop="30dp"
+        android:layout_gravity="center" />
+
+    <TextView
+        android:id="@+id/txtLogout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Logout"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="18sp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center" />
+</LinearLayout>

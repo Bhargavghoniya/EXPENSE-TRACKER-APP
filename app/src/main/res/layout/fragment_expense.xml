@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/txtTitleExpense"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Expense"
+        android:textStyle="bold"
+        android:textSize="22sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Date -->
+    <TextView
+        android:id="@+id/txtViewDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="yyyy-mm-dd"
+        android:textSize="16sp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/txtTitleExpense"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Calendar Icon -->
+    <ImageView
+        android:id="@+id/imgViewCalendar"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/calendar_m"
+        app:layout_constraintStart_toEndOf="@id/txtViewDate"
+        app:layout_constraintTop_toTopOf="@id/txtViewDate" />
+
+    <!-- Amount Input -->
+    <EditText
+        android:id="@+id/editTxtAmount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Amount"
+        android:inputType="numberDecimal"
+        app:layout_constraintTop_toBottomOf="@id/txtViewDate"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/LoginEditText"/>
+
+    <!-- Notes Input -->
+    <EditText
+        android:id="@+id/editTxtNotes"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Note"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/editTxtAmount"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/LoginEditText"/>
+
+    <!-- Choose Category Button -->
+    <Button
+        android:id="@+id/btnChooseCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose Category"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/editTxtNotes"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- GridView for Categories -->
+    <GridView
+        android:id="@+id/gridViewCategories"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:numColumns="3"
+        android:verticalSpacing="12dp"
+        android:horizontalSpacing="12dp"
+        android:visibility="gone"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/btnChooseCategory"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

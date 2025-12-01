@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/login">
+
+    <!-- LOGIN BOX -->
+    <LinearLayout
+        android:id="@+id/loginBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="0dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <EditText
+            android:id="@+id/login_username"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/lavender_border"
+            android:drawableLeft="@drawable/email"
+            android:drawablePadding="8dp"
+            android:drawableTint="@color/lavender"
+            android:hint="Username"
+            android:padding="12dp"/>
+
+        <EditText
+            android:id="@+id/login_password"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/lavender_border"
+            android:digits="0123456789"
+            android:drawableLeft="@drawable/password"
+            android:drawablePadding="8dp"
+            android:drawableTint="@color/lavender"
+            android:hint="Password"
+            android:inputType="numberDecimal"
+            android:maxLength="4"
+            android:padding="12dp"/>
+
+        <Button
+            android:id="@+id/login_button"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="25dp"
+            android:text="Login"
+            android:textSize="18sp"
+            app:cornerRadius="30dp" />
+
+        <TextView
+            android:id="@+id/signupRedirectText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="2dp"
+            android:text="Not yet registered? Signup"
+            android:textColor="@color/lavender"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+</RelativeLayout>

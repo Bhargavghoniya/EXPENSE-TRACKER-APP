@@ -1,0 +1,34 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <item
+        android:id="@+id/nav_home"
+        android:title="Home"
+        android:icon="@drawable/ic_home" />
+
+
+    <item
+        android:id="@+id/nav_income"
+        android:title="Add Income"
+        android:icon="@drawable/ic_income" />
+
+
+    <item
+        android:id="@+id/nav_balance"
+        android:title="Balance"
+        android:icon="@drawable/baseline_account_balance_wallet_24" />
+
+
+    <item
+        android:id="@+id/nav_expense"
+        android:title="Expense"
+        android:icon="@drawable/ic_expense" />
+
+
+    <item
+        android:id="@+id/nav_setting"
+        android:title="Setting"
+        android:icon="@drawable/ic_setting" />
+
+
+</menu>

@@ -2,10 +2,10 @@ package com.example.expensetracker;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -25,308 +25,432 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_AMOUNT = "COLUMN_AMOUNT";
     public static final String COLUMN_DATE = "COLUMN_DATE";
     public static final String COLUMN_GROUP = "COLUMN_GROUP";
+    public static final String COLUMN_USERNAME = "COLUMN_USERNAME";  // 🔥 NEW
+
+    public static final String USER_TABLE = "USER_TABLE";
+    public static final String USER_ID = "ID";
+    public static final String USERNAME = "USERNAME";
+    public static final String PASSWORD = "PASSWORD";
+
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     Context context;
 
     public DatabaseHelper(@Nullable Context context) {
-        super(context, "data.db", null, 1);
+        super(context, "data.db", null, 3);  // 🔥 bump version
+        this.context = context;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createDatabaseStat = "CREATE TABLE " + EXPENSE_TABLE +
-                "( " + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + COLUMN_DATE + " TEXT, "
-                + COLUMN_CATEGORY + " TEXT, " + COLUMN_NOTE + " TEXT, " + COLUMN_GROUP + " TEXT, " + COLUMN_AMOUNT + " REAL)";
 
-        db.execSQL(createDatabaseStat);
+        // 🔥 NEW EXPENSE TABLE WITH USERNAME
+        db.execSQL("CREATE TABLE " + EXPENSE_TABLE + "(" +
+                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_DATE + " TEXT, " +
+                COLUMN_CATEGORY + " TEXT, " +
+                COLUMN_NOTE + " TEXT, " +
+                COLUMN_GROUP + " TEXT, " +
+                COLUMN_AMOUNT + " REAL, " +
+                COLUMN_USERNAME + " TEXT)");
+
+        // USER TABLE
+        db.execSQL("CREATE TABLE " + USER_TABLE + "(" +
+                USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                USERNAME + " TEXT UNIQUE, " +
+                PASSWORD + " TEXT)");
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int i, int i1) {
-        // Drop older table if exist
-        db.execSQL("DROP TABLE IF EXISTS " + EXPENSE_TABLE);
-        // Create tables again
-        onCreate(db);
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+        // User table already handled
+        if (oldVersion < 2) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + USER_TABLE + "(" +
+                    USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    USERNAME + " TEXT UNIQUE, " +
+                    PASSWORD + " TEXT)");
+        }
+
+        // 🔥 DROP and RECREATE expense table because app uninstall clean
+        if (oldVersion < 3) {
+            db.execSQL("DROP TABLE IF EXISTS " + EXPENSE_TABLE);
+            onCreate(db);
+        }
     }
 
-    public boolean addData(TransactionModel transactionModel) {
+    // ------------------ AUTH ------------------
+
+    public boolean registerUser(String username, String password) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(USERNAME, username);
+        cv.put(PASSWORD, password);
+        return db.insert(USER_TABLE, null, cv) != -1;
+    }
+
+    public boolean checkUser(String username, String password) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + USER_TABLE + " WHERE " + USERNAME + "=? AND " + PASSWORD + "=?",
+                new String[]{username, password});
+
+        boolean exists = cursor.moveToFirst();
+        cursor.close();
+        return exists;
+    }
+
+    public boolean isUserExists(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + USER_TABLE + " WHERE " + USERNAME + "=?",
+                new String[]{username});
+
+        boolean exists = cursor.moveToFirst();
+        cursor.close();
+        return exists;
+    }
+
+    // ------------------ EXPENSE INSERT ------------------
+    private String getCurrentUser() {
+        SharedPreferences sp = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+        return sp.getString("username", "");
+    }
+
+    public boolean updateUserPassword(String username, String newPassword) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(PASSWORD, newPassword);
+        return db.update(USER_TABLE, cv, USERNAME + "=?", new String[]{username}) > 0;
+    }
+    public boolean addData(TransactionModel model) {
         try {
+            SharedPreferences sp = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+            String loggedUser = sp.getString("username", "unknown");
+
             SQLiteDatabase db = this.getWritableDatabase();
             ContentValues cv = new ContentValues();
-            cv.put(COLUMN_DATE, dateFormat.format(transactionModel.getDate()));
-            cv.put(COLUMN_CATEGORY, transactionModel.getCategory());
-            cv.put(COLUMN_AMOUNT, transactionModel.getAmount());
-            cv.put(COLUMN_NOTE, transactionModel.getNote());
-            cv.put(COLUMN_GROUP, transactionModel.getGroup());
+
+            cv.put(COLUMN_DATE, dateFormat.format(model.getDate()));
+            cv.put(COLUMN_CATEGORY, model.getCategory());
+            cv.put(COLUMN_AMOUNT, model.getAmount());
+            cv.put(COLUMN_NOTE, model.getNote());
+            cv.put(COLUMN_GROUP, model.getGroup());
+            cv.put(COLUMN_USERNAME, loggedUser);   // 🔥 assign user
+
             return db.insert(EXPENSE_TABLE, null, cv) > 0;
+
         } catch (Exception ex) {
+            ex.printStackTrace();
             return false;
         }
     }
 
-    public boolean deleteData(TransactionModel transactionModel) {
+    // ------------------ GET LOGGED USER ------------------
 
-        String deleteQuery = "DELETE FROM " + EXPENSE_TABLE + " WHERE " + COLUMN_ID + " = " + transactionModel.getId();
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(deleteQuery, null);
-        if (cursor.moveToFirst()) {
-            return true;
-        } else {
-            return false;
-        }
+    private String getLoggedUser() {
+        SharedPreferences sp = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+        return sp.getString("username", "");
     }
+
+    // ------------------ SEARCH ------------------
 
     public List<TransactionModel> getSearchedData(String item) {
 
-        //create an empty arrayList
         List<TransactionModel> returnList = new ArrayList<>();
-        //search query
-        String queryString = "SELECT * FROM " + EXPENSE_TABLE +
-                " WHERE UPPER(" + COLUMN_CATEGORY + ")= " + "UPPER('" + item + "')" +
-                " OR UPPER(" + COLUMN_NOTE + ") LIKE " + "UPPER('%" + item + "%')";
+        String user = getLoggedUser();
+
+        String query = "SELECT * FROM " + EXPENSE_TABLE +
+                " WHERE " + COLUMN_USERNAME + "=? AND (" +
+                " UPPER(" + COLUMN_CATEGORY + ")=UPPER(?) OR " +
+                " UPPER(" + COLUMN_NOTE + ") LIKE UPPER(?) )";
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery(queryString, null);
+        Cursor cursor = db.rawQuery(query,
+                new String[]{user, item, "%" + item + "%"}
+        );
+
         if (cursor.moveToFirst()) {
             do {
-                try {
-                    int id = cursor.getInt(0);
-                    String dateStr = cursor.getString(1);
-                    String cat = cursor.getString(2);
-                    String note = cursor.getString(3);
-                    String group = cursor.getString(4);
-                    double amount = cursor.getDouble(5);
-                    Date date = dateFormat.parse(dateStr);
-
-                    Log.d("MyHelper", id + " " + dateStr + " " + cat + " " + note + " " + group + " " + amount);
-
-                    TransactionModel transactionModel1 = new TransactionModel(id, date, cat, note, group, amount);
-                    returnList.add(transactionModel1);
-
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    Toast.makeText(context, "date parse error", Toast.LENGTH_SHORT).show();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+                returnList.add(getRecordFromCursor(cursor));
             } while (cursor.moveToNext());
-
-        } else {
         }
 
         return returnList;
     }
 
-    public List<TransactionModel> getAllData() {
-        List<TransactionModel> returnList = new ArrayList<>();
+    // ------------------ DAILY FILTER ------------------
 
-        String statStr = "SELECT * FROM " + EXPENSE_TABLE;
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.rawQuery(statStr, null);
-        if (cursor.moveToFirst()) {
-            do {
-                try {
-                    int id = cursor.getInt(0);
-                    String dateStr = cursor.getString(1);
-                    String cat = cursor.getString(2);
-                    String note = cursor.getString(3);
-                    String group = cursor.getString(4);
-                    double amount = cursor.getDouble(5);
-                    Date date = dateFormat.parse(dateStr);
-                    TransactionModel transactionModel1 = new TransactionModel(id, date, cat, note, group, amount);
-                    returnList.add(transactionModel1);
-
-                } catch (ParseException ps) {
-                    ps.printStackTrace();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            } while (cursor.moveToNext());
-        }
-        return returnList;
-    }
-
-// getDateByDate
     public ArrayList<TransactionModel> getDataByDate(Date today) {
 
-        //create an empty arrayList
         ArrayList<TransactionModel> returnList = new ArrayList<>();
-        //search query
-        String queryString = "SELECT * FROM " + EXPENSE_TABLE + " WHERE " + COLUMN_DATE + "= " + "'" + dateFormat.format(today) + "'";
+        String user = getLoggedUser();
+
+        String query = "SELECT * FROM " + EXPENSE_TABLE +
+                " WHERE " + COLUMN_DATE + "=? AND " +
+                COLUMN_USERNAME + "=?" +
+                " ORDER BY " + COLUMN_DATE;
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery(queryString, null);
-        if (cursor.moveToFirst()) {
-            do {
-                try {
-                    int id = cursor.getInt(0);
-                    String dateStr = cursor.getString(1);
-                    String cat = cursor.getString(2);
-                    String note = cursor.getString(3);
-                    String group = cursor.getString(4);
-                    double amount = cursor.getDouble(5);
-                    Date date = dateFormat.parse(dateStr);
-                    Log.d("MyHelper", id + " " + dateStr + " " + cat + " " + note + " " + group + " " + amount);
-                    TransactionModel transactionModel1 = new TransactionModel(id, date, cat, note, group, amount);
-                    returnList.add(transactionModel1);
+        Cursor cursor = db.rawQuery(query,
+                new String[]{dateFormat.format(today), user});
 
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    Toast.makeText(context, "date parse error", Toast.LENGTH_SHORT).show();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            } while (cursor.moveToNext());
+        if (cursor.moveToFirst()) {
+            do returnList.add(getRecordFromCursor(cursor));
+            while (cursor.moveToNext());
         }
+
         return returnList;
     }
 
-    // getDateByYear
+    // ------------------ YEAR FILTER ------------------
 
     public ArrayList<TransactionModel> getDataByYear(String year) {
 
-        //create an empty arrayList
-        ArrayList<TransactionModel> returnList = new ArrayList<>();
-        //search query
-        String queryString = "SELECT * FROM " + EXPENSE_TABLE +
-                " WHERE " + COLUMN_DATE + " LIKE" + "'" + year + "%'" + " ORDER BY " + COLUMN_DATE + " ASC";
+        ArrayList<TransactionModel> list = new ArrayList<>();
+        String user = getLoggedUser();
+
+        String query = "SELECT * FROM " + EXPENSE_TABLE +
+                " WHERE " + COLUMN_DATE + " LIKE ? AND " +
+                COLUMN_USERNAME + "=? ORDER BY " + COLUMN_DATE;
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery(queryString, null);
+        Cursor cursor = db.rawQuery(query,
+                new String[]{year + "%", user});
+
         if (cursor.moveToFirst()) {
-            do {
-                try {
-                    int id = cursor.getInt(0);
-                    String dateStr = cursor.getString(1);
-                    String cat = cursor.getString(2);
-                    String note = cursor.getString(3);
-                    String group = cursor.getString(4);
-                    double amount = cursor.getDouble(5);
-                    Date date = dateFormat.parse(dateStr);
-                    TransactionModel transactionModel1 = new TransactionModel(id, date, cat, note, group, amount);
-                    returnList.add(transactionModel1);
-
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    Toast.makeText(context, "date parse error", Toast.LENGTH_SHORT).show();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            } while (cursor.moveToNext());
-
+            do list.add(getRecordFromCursor(cursor));
+            while (cursor.moveToNext());
         }
 
-        return returnList;
+        return list;
     }
 
-    // getDateByYear
+    // ------------------ MONTH FILTER ------------------
 
     public ArrayList<TransactionModel> getDataByMonth(String month) {
 
-        //create an empty arrayList
-        ArrayList<TransactionModel> returnList = new ArrayList<>();
-        //search query
-        String queryString = "SELECT * FROM " + EXPENSE_TABLE +
-                " WHERE " + COLUMN_DATE + " LIKE" + "'_____" + month + "%'" + " ORDER BY " + COLUMN_DATE + " ASC";
-        Log.d("updateMonth", queryString);
+        ArrayList<TransactionModel> list = new ArrayList<>();
+        String user = getLoggedUser();
+
+        String query = "SELECT * FROM " + EXPENSE_TABLE +
+                " WHERE " + COLUMN_DATE + " LIKE ? AND " +
+                COLUMN_USERNAME + "=? ORDER BY " + COLUMN_DATE;
+
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery(queryString, null);
-        if (cursor.moveToFirst()) {
-            do {
-                try {
-                    int id = cursor.getInt(0);
-                    String dateStr = cursor.getString(1);
-                    String cat = cursor.getString(2);
-                    String note = cursor.getString(3);
-                    String group = cursor.getString(4);
-                    double amount = cursor.getDouble(5);
-                    Date date = dateFormat.parse(dateStr);
-                    TransactionModel transactionModel1 = new TransactionModel(id, date, cat, note, group, amount);
-                    returnList.add(transactionModel1);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    Toast.makeText(context, "date parse error", Toast.LENGTH_SHORT).show();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            } while (cursor.moveToNext());
+        Cursor cursor = db.rawQuery(query,
+                new String[]{"_____" + month + "%", user});
 
+        if (cursor.moveToFirst()) {
+            do list.add(getRecordFromCursor(cursor));
+            while (cursor.moveToNext());
         }
 
-        return returnList;
+        return list;
     }
+
+    // ------------------ MONTH + YEAR FILTER ------------------
+
+    public List<TransactionModel> getDataByMonthYear(String month, String year) {
+
+        List<TransactionModel> list = new ArrayList<>();
+        String user = getLoggedUser();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + EXPENSE_TABLE +
+                        " WHERE strftime('%m'," + COLUMN_DATE + ")=? AND " +
+                        " strftime('%Y'," + COLUMN_DATE + ")=? AND " +
+                        COLUMN_USERNAME + "=? ORDER BY " + COLUMN_DATE,
+                new String[]{month, year, user}
+        );
+
+        if (cursor.moveToFirst()) {
+            do list.add(getRecordFromCursor(cursor));
+            while (cursor.moveToNext());
+        }
+
+        return list;
+    }
+
+    // ------------------ PIE CHART ------------------
 
     public ArrayList<TransactionModel> Pie(Date today) {
-        ArrayList<TransactionModel> returnList = new ArrayList<>();
-        String queryString = " SELECT COLUMN_CATEGORY, SUM(abs(COLUMN_AMOUNT)) FROM " + EXPENSE_TABLE
-                + " WHERE " + COLUMN_DATE + " = " + "'" + dateFormat.format(today) + "'" + " AND "
-                + COLUMN_CATEGORY + " NOT LIKE " + "'%salary%'" + " AND " + COLUMN_CATEGORY
-                + " NOT LIKE " + "'%deposit%'" + " GROUP BY " + COLUMN_CATEGORY;
+
+        ArrayList<TransactionModel> list = new ArrayList<>();
+        String user = getLoggedUser();
+
+        String query =
+                "SELECT " + COLUMN_CATEGORY + ", SUM(abs(" + COLUMN_AMOUNT + "))" +
+                        " FROM " + EXPENSE_TABLE +
+                        " WHERE " + COLUMN_DATE + "=? AND " +
+                        COLUMN_USERNAME + "=? AND " +
+                        COLUMN_CATEGORY + " NOT LIKE '%salary%' AND " +
+                        COLUMN_CATEGORY + " NOT LIKE '%deposit%' " +
+                        " GROUP BY " + COLUMN_CATEGORY;
+
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(queryString, null);
+
+        Cursor cursor = db.rawQuery(query,
+                new String[]{dateFormat.format(today), user});
+
         if (cursor.moveToFirst()) {
             do {
-                try {
-                    String cat = cursor.getString(0);
-                    double amount = cursor.getDouble(1);
-                    TransactionModel pieModel = new TransactionModel(cat, amount);
-                    returnList.add(pieModel);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+                list.add(new TransactionModel(
+                        cursor.getString(0),
+                        cursor.getDouble(1)
+                ));
             } while (cursor.moveToNext());
         }
-        return returnList;
+
+        return list;
     }
 
-    public ArrayList<TransactionModel> PieMonth(String month) {
-        ArrayList<TransactionModel> returnList = new ArrayList<>();
-        String queryString = " SELECT COLUMN_CATEGORY, SUM(abs(COLUMN_AMOUNT)) FROM " + EXPENSE_TABLE
-                + " WHERE " + COLUMN_DATE + " LIKE" + "'_____" + month + "%'" + " AND "
-                + COLUMN_CATEGORY + " NOT LIKE " + "'%salary%'" + " AND " + COLUMN_CATEGORY
-                + " NOT LIKE " + "'%deposit%'" + " GROUP BY " + COLUMN_CATEGORY;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(queryString, null);
-        if (cursor.moveToFirst()) {
-            do {
-                try {
-                    String cat = cursor.getString(0);
-                    double amount = cursor.getDouble(1);
-                    TransactionModel pieModel = new TransactionModel(cat, amount);
-                    returnList.add(pieModel);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            } while (cursor.moveToNext());
-        }
-        return returnList;
+    // ------------------ UPDATE ------------------
+
+    public boolean updateData(TransactionModel m) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        cv.put(COLUMN_CATEGORY, m.getCategory());
+        cv.put(COLUMN_NOTE, m.getNote());
+        cv.put(COLUMN_GROUP, m.getGroup());
+        cv.put(COLUMN_AMOUNT, m.getAmount());
+        cv.put(COLUMN_DATE, new SimpleDateFormat("yyyy-MM-dd").format(m.getDate()));
+        // keep same user
+
+        return db.update(EXPENSE_TABLE, cv, COLUMN_ID + "=? AND " + COLUMN_USERNAME + "=?",
+                new String[]{String.valueOf(m.getId()), getCurrentUser()}) > 0;
     }
 
-    public ArrayList<TransactionModel> PieYear(String year) {
-        ArrayList<TransactionModel> returnList = new ArrayList<>();
-        String queryString = " SELECT COLUMN_CATEGORY, SUM(abs(COLUMN_AMOUNT)) FROM " + EXPENSE_TABLE
-                + " WHERE " + COLUMN_DATE + " LIKE" + "'" + year + "%'" + " AND "
-                + COLUMN_CATEGORY + " NOT LIKE " + "'%salary%'" + " AND " + COLUMN_CATEGORY
-                + " NOT LIKE " + "'%deposit%'" + " GROUP BY " + COLUMN_CATEGORY;
+    // ------------------ DELETE ------------------
+
+    public boolean deleteData(TransactionModel transactionModel) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rows = db.delete(EXPENSE_TABLE,
+                COLUMN_ID + "=? AND " + COLUMN_USERNAME + "=?",
+                new String[]{String.valueOf(transactionModel.getId()), getCurrentUser()});
+        return rows > 0;
+    }
+
+    // ------------------ CURSOR → MODEL ------------------
+
+    private TransactionModel getRecordFromCursor(Cursor cursor) {
+
+        try {
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+            String dateStr = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE));
+            String cat = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY));
+            String note = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTE));
+            String group = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_GROUP));
+            double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_AMOUNT));
+
+            Date date = dateFormat.parse(dateStr);
+
+            return new TransactionModel(id, date, cat, note, group, amount);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            Toast.makeText(context, "date parse error", Toast.LENGTH_SHORT).show();
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // All expenses for current user (for PDF)
+    public List<TransactionModel> getAllExpensesForCurrentUser() {
+        List<TransactionModel> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(queryString, null);
+
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + EXPENSE_TABLE +
+                        " WHERE " + COLUMN_USERNAME + " = ? " +
+                        " ORDER BY " + COLUMN_DATE + " ASC",
+                new String[]{getCurrentUser()}
+        );
+
         if (cursor.moveToFirst()) {
             do {
-                try {
-                    String cat = cursor.getString(0);
-                    double amount = cursor.getDouble(1);
-                    TransactionModel pieModel = new TransactionModel(cat, amount);
-                    returnList.add(pieModel);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+                list.add(getRecordFromCursor(cursor));
             } while (cursor.moveToNext());
         }
-        return returnList;
+
+        cursor.close();
+        return list;
     }
+
+
+
+    public void deleteAllExpensesForCurrentUser() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(EXPENSE_TABLE, COLUMN_USERNAME + "=?", new String[]{getCurrentUser()});
+    }
+
+    public double getTotalIncome() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT SUM(" + COLUMN_AMOUNT + ") FROM " + EXPENSE_TABLE +
+                        " WHERE " + COLUMN_AMOUNT + " > 0 AND " + COLUMN_USERNAME + "=?",
+                new String[]{getCurrentUser()}
+        );
+        if (c.moveToFirst()) {
+            double val = c.getDouble(0);
+            c.close();
+            return val;
+        }
+        c.close();
+        return 0;
+    }
+
+    public double getTotalExpense() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT SUM(" + COLUMN_AMOUNT + ") FROM " + EXPENSE_TABLE +
+                        " WHERE " + COLUMN_AMOUNT + " < 0 AND " + COLUMN_USERNAME + "=?",
+                new String[]{getCurrentUser()}
+        );
+        if (c.moveToFirst()) {
+            double val = c.getDouble(0);
+            c.close();
+            return Math.abs(val);
+        }
+        c.close();
+        return 0;
+    }
+
+    public int getTotalEntries() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT COUNT(*) FROM " + EXPENSE_TABLE +
+                        " WHERE " + COLUMN_USERNAME + "=?",
+                new String[]{getCurrentUser()}
+        );
+        if (c.moveToFirst()) {
+            int val = c.getInt(0);
+            c.close();
+            return val;
+        }
+        c.close();
+        return 0;
+    }
+    public boolean updateUsername(String oldUsername, String newUsername) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(USERNAME, newUsername);
+        return db.update(USER_TABLE, cv, USERNAME + "=?", new String[]{oldUsername}) > 0;
+    }
+
+    public void updateExpenseUsername(String oldUsername, String newUsername) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COLUMN_USERNAME, newUsername);
+        db.update(EXPENSE_TABLE, cv, COLUMN_USERNAME + "=?", new String[]{oldUsername});
+    }
+
 }

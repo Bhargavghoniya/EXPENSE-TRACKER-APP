@@ -1,202 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- Main content -->
+    <FrameLayout
+        android:id="@+id/main_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent" />
+
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_gravity="bottom"
+        android:background="#8692F7"
+        app:labelVisibilityMode="labeled"
+        app:itemIconTint="@color/nav_item_color"
+        app:itemTextColor="@color/nav_item_color"
+        app:itemBackground="@drawable/bottom_nav_item_background"
+        app:menu="@menu/bottom_nav_menu"/>
 
 
-        <androidx.appcompat.widget.Toolbar
-
-            android:id="@+id/toolbar"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="#8692f7"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark"
-            app:layout_constraintBottom_toTopOf="@+id/txtViewInterval"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:navigationIcon="@drawable/listfinal"
-            app:title="Expense Tracker"
-            app:titleTextColor="@color/white">
-        </androidx.appcompat.widget.Toolbar>
-
-        <ImageView
-            android:id="@+id/imgViewTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="@+id/toolbar"
-            app:layout_constraintStart_toStartOf="@+id/toolbar"
-            app:layout_constraintTop_toTopOf="@+id/toolbar"
-            app:srcCompat="@drawable/title_3" />
-
-        <TextView
-            android:id="@+id/txtViewInterval"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="32dp"
-            android:gravity="center"
-            android:text="Hello World!"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar" />
-
-
-        <TextView
-            android:id="@+id/txtViewItem"
-            android:layout_width="91dp"
-            android:layout_height="80dp"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:fontFamily="sans-serif-smallcaps"
-            android:textColor="#8692f7"
-            android:background="@color/white"
-            android:gravity="center"
-            android:text="TextView"
-            android:textSize="20sp"
-            app:layout_constraintBottom_toBottomOf="@+id/relLayoutHome"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/relLayoutHome" />
-
-        <TextView
-            android:id="@+id/txtViewSummary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:fontFamily="sans-serif-smallcaps"
-            android:gravity="center"
-            android:text="textView"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="@+id/relLayoutHome"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/relLayoutHome" />
-
-        <RelativeLayout
-            android:id="@+id/relLayoutHome"
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/txtViewInterval">
-
-            <com.github.mikephil.charting.charts.PieChart
-                android:id="@+id/pie"
-                android:layout_width="250dp"
-                android:layout_height="250dp"
-                android:layout_centerInParent="true" />
-
-            <com.example.expensetracker.CircleListView
-                android:id="@+id/circle_list_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clickable="true"
-                tools:ignore="SpeakableTextPresentCheck" />
-
-        </RelativeLayout>
-
-
-
-        <!-- Balance Button -->
-        <Button
-            android:id="@+id/btnBalance"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:text="= Balance ="
-            android:textColor="@color/white"
-            android:textSize="22sp"
-            android:background="#8692f7"
-            android:fontFamily="sans-serif-black"
-            app:layout_constraintTop_toBottomOf="@+id/relLayoutHome"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="30dp" />
-
-        <!-- Table-like layout for Add / Remove buttons -->
-        <TableLayout
-            android:id="@+id/tableActions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:padding="16dp"
-            app:layout_constraintTop_toBottomOf="@+id/btnBalance"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center">
-
-                <!-- Remove Money -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:id="@+id/imageViewIncome"
-                        android:layout_width="70dp"
-                        android:layout_height="70dp"
-                        android:src="@drawable/wallet2"
-                        android:contentDescription="Remove Money" />
-
-
-                </LinearLayout>
-
-                <!-- Add Money -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:id="@+id/imageViewExpense"
-                        android:layout_width="70dp"
-                        android:layout_height="70dp"
-                        android:src="@drawable/rwallet2"
-                        android:contentDescription="Add Money" />
-
-
-                </LinearLayout>
-
-            </TableRow>
-        </TableLayout>
-
-
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    <!--
-         Navigation view to show the menu items
-    -->
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/navigation"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:menu="@menu/nav_items" />
-
-
-</androidx.drawerlayout.widget.DrawerLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
